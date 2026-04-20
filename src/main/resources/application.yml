@@ -1,0 +1,27 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: sffron-auth
+  config:
+    import: "secret.yml"
+
+# 로그 파일 저장 경로 (날짜별 롤링 파일 생성)
+# logback-spring.xml 에서 LOG_PATH 변수로 참조됨
+logging:
+  file:
+    path: C:/temp/auth
+  level:
+    root: INFO
+    org.springframework.security: TRACE
+
+# CORS 허용 origin 목록
+# 프론트엔드 또는 API 서버의 주소를 추가/수정
+cors:
+  # 개발 중 전체 허용 (* 사용 시 모든 origin 허용)
+  # 운영 전 실제 도메인으로 변경: "http://localhost:8080,http://localhost:8081"
+  allowed-origins: "*"
+
+redirect:
+  after-login: "http://localhost:8080/main"

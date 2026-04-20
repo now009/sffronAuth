@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- application.yml의 logging.file.path 값을 LOG_PATH로 참조 -->
+    <!-- 값이 없을 경우 C:/temp 를 기본값으로 사용 -->
+    <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="C:/temp"/>
+
+    <!-- 로그 출력 패턴 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"/>
+
+    <!-- 콘솔 출력 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 날짜별 롤링 파일 출력 -->
+    <!-- 매일 자정에 새 파일 생성, 최대 30일치 보관 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/sffron-auth.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 파일명 형식: sffron-auth.2025-04-20.log -->
+            <fileNamePattern>${LOG_PATH}/sffron-auth.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Spring Security 로그: TRACE -->
+    <!-- 인증/인가 상세 흐름 확인용 -->
+    <logger name="org.springframework.security" level="TRACE" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- 기본 로그 레벨: INFO -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
