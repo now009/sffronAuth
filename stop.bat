@@ -11,15 +11,15 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":%PORT%" ^| findstr "LISTENI
 )
 
 if not defined PID (
-    echo [INFO] %PORT% 포트에서 실행 중인 프로세스가 없습니다.
+    echo [INFO] No process listening on port %PORT%.
     exit /b 0
 )
 
-echo [INFO] %APP_NAME% 종료 ^(PID !PID!^)
+echo [INFO] Stopping %APP_NAME% ^(PID !PID!^)
 taskkill /F /PID !PID!
 if errorlevel 1 (
-    echo [ERROR] 프로세스 종료 실패
+    echo [ERROR] Failed to terminate process
     exit /b 1
 )
-echo [INFO] 종료 완료
+echo [INFO] Stopped
 endlocal
