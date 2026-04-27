@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: sffron-auth
+    name: Saffron-auth
   config:
     import: "secret.yml"
 

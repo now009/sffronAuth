@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>com.saffron</groupId>
-    <artifactId>sffron-auth</artifactId>
+    <artifactId>Saffron-auth</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>sffronAuth</name>
+    <name>Saffron-auth</name>
     <description>Saffron OAuth2 Authorization Server</description>
     <packaging>jar</packaging>
 

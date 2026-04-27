@@ -6,9 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class SffronAuthApplication {
+public class SaffronAuthApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SffronAuthApplication.class, args);
+        SpringApplication.run(SaffronAuthApplication.class, args);
     }
 }
