@@ -52,3 +52,59 @@ SecurityConfig.java
 service/
 JwtTokenService.java      ← JWT 생성
 UserAuthService.java      ← 사용자 인증 (secret.yml → 추후 DB)
+
+--------------------------------------------------------
+1. DB 관련정보를 yml에 설정하고 
+   - database : mariadb://localhost:3306/saffron
+2. login 요청온 사용자 아이디 / 비번을 user_info userId,password 컬럼 에서 확인 
+   비번은 - -- 암호화 : BCryptPasswordEncoder를 이용
+
+   userId
+   deptId
+   userName
+   email
+
+front에서 아이디 비번 입력후 auth서버에서 아이디비번 입력확인 한후 
+JWT에 user_info table의    userId,deptId,userName,email 담아
+fornt에서 활용할수 있는 방법은 어떤것이 있는가? 
+이 과정에서 backend의 역할은?
+access_token은 JWT에 담아 사용하는가?
+
+현재 로그인 API가 있는데 JWT 토큰 생성 기능을 추가해줘.
+
+조건:
+-. DB 관련정보를 yml에 설정하고
+  - database : mariadb://localhost:3306/saffron
+  - backend yml부분 예시
+    datasource:
+      url: jdbc:p6spy:mariadb://localhost:3306/saffron?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+      username: now009
+      password: 2799
+      driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+  - 
+- POST /auth/login (userId, password) 요청 받음  -- 지금 코드에서 받은 변수명과 동일한지 확인, 기존변수명 우선
+- user_info 테이블에서 userId, password 검증
+- 검증 성공 시 JWT access_token 생성
+  - payload에 포함할 항목: userId, deptId, userName, email
+  - 만료시간: 1시간
+  - 알고리즘: HS256
+- 생성된 access_token을 담아
+  http://localhost:8080/main?access_token={token} 으로 redirect -- 기존 url 코드가 있으면 유지
+
+user_info 테이블 구조:
+    CREATE TABLE user_role (
+    userId      VARCHAR(50) NOT NULL  COMMENT '사용자ID',
+    roleCode    VARCHAR(50) NOT NULL  COMMENT '권한코드',
+    createdUser VARCHAR(20) DEFAULT 'system'          COMMENT '생성자',
+    createdDate TIMESTAMP   DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    PRIMARY KEY (userId, roleCode)
+    ) COMMENT '사용자권한매핑';
+
+JWT secret key는 application.yml에서 관리할 것
+
+- service/UserAuthService.java — yml 인메모리 사용자 → UserInfoRepository.findById() 로 전환
+- service/JwtTokenService.java — RSA(JwtEncoder) → HS256(jjwt) 재작성, payload userId/deptId/userName/email, 1시간 만료
+- controller/AuthController.java — 인증 후 UserInfo 조회해 JWT 발급, redirect URL 그대로 유지
+- 
+secret.yml의 auth.users: 제거 
+JWT secret: secret.yml

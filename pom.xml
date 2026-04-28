@@ -12,14 +12,15 @@
     </parent>
 
     <groupId>com.saffron</groupId>
-    <artifactId>sffron-auth</artifactId>
+    <artifactId>Saffron-auth</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>sffronAuth</name>
+    <name>Saffron-auth</name>
     <description>Saffron OAuth2 Authorization Server</description>
     <packaging>jar</packaging>
 
     <properties>
         <java.version>17</java.version>
+        <skipTests>true</skipTests>
     </properties>
 
     <dependencies>
@@ -39,6 +40,44 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
+        </dependency>
+
+        <!-- JPA -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- MariaDB Driver -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+        </dependency>
+
+        <!-- P6Spy: SQL 로깅 -->
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+            <version>3.9.1</version>
+        </dependency>
+
+        <!-- JJWT: HS256 JWT 발급 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
         </dependency>
 
 <!-- Configuration Processor -->

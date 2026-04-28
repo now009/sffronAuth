@@ -11,16 +11,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "auth")
 public class AuthSecretProperties {
 
-    private List<UserConfig> users;
     private List<ClientConfig> clients;
-
-    @Getter
-    @Setter
-    public static class UserConfig {
-        private String username;
-        private String password;
-        private List<String> roles;
-    }
 
     @Getter
     @Setter

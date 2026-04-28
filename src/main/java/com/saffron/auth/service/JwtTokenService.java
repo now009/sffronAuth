@@ -1,36 +1,56 @@
 package com.saffron.auth.service;
 
-import lombok.RequiredArgsConstructor;
+import com.saffron.auth.entity.UserInfo;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.stream.Collectors;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 @Service
-@RequiredArgsConstructor
 public class JwtTokenService {
 
-    private final JwtEncoder jwtEncoder;
+    @Value("${jwt.secret}")
+    private String secret;
 
-    public String generate(Authentication authentication) {
-        Instant now = Instant.now();
+    @Value("${jwt.expiration-seconds:3600}")
+    private long expirationSeconds;
 
-        String roles = authentication.getAuthorities().stream()
-            .map(a -> a.getAuthority())
-            .collect(Collectors.joining(" "));
+    private SecretKey key;
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-            .issuer("http://localhost:8090")
+    @PostConstruct
+    void init() {
+        // HS256 은 최소 256bit(32 byte) 키 필요. application.yml 에서 관리.
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String generate(UserInfo user, Authentication authentication) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + expirationSeconds * 1000L);
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        JwtBuilder builder = Jwts.builder()
+            .subject(user.getUserId())
+            .claim("userId", user.getUserId())
+            .claim("deptId", user.getDeptId())
+            .claim("userName", user.getUserName())
+            .claim("email", user.getEmail())
             .issuedAt(now)
-            .expiresAt(now.plusSeconds(3600))
-            .subject(authentication.getName())
-            .claim("roles", roles)
-            .build();
+            .expiration(expiry)
+            .signWith(key, Jwts.SIG.HS256);
 
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        if (isAdmin) {
+            builder.claim("manager", "y");
+        }
+
+        return builder.compact();
     }
 }

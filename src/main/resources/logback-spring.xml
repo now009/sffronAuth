@@ -19,10 +19,10 @@
     <!-- 날짜별 롤링 파일 출력 -->
     <!-- 매일 자정에 새 파일 생성, 최대 30일치 보관 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/sffron-auth.log</file>
+        <file>${LOG_PATH}/Saffron-auth.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- 파일명 형식: sffron-auth.2025-04-20.log -->
-            <fileNamePattern>${LOG_PATH}/sffron-auth.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 파일명 형식: Saffron-auth.2025-04-20.log -->
+            <fileNamePattern>${LOG_PATH}/Saffron-auth.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>

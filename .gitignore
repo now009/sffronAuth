@@ -1,0 +1,15 @@
+# Build output
+target/
+
+# IDE / Tooling
+.idea/
+.claude/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs (실행 시 생성)
+app.log
+*.log
