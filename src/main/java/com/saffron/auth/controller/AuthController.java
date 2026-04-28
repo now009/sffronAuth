@@ -1,5 +1,7 @@
 package com.saffron.auth.controller;
 
+import com.saffron.auth.entity.UserInfo;
+import com.saffron.auth.repository.UserInfoRepository;
 import com.saffron.auth.service.JwtTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +30,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
+    private final UserInfoRepository userInfoRepository;
 
     @PostMapping("/login")
     public void login(@RequestParam("userId") String username,
@@ -44,7 +48,10 @@ public class AuthController {
 
         log.info("[AUTH] login success - username: {}", username);
 
-        String token = jwtTokenService.generate(authentication);
+        UserInfo user = userInfoRepository.findById(authentication.getName())
+            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + authentication.getName()));
+
+        String token = jwtTokenService.generate(user);
 
         response.sendRedirect(afterLoginRedirectUrl + "?access_token=" + token);
     }

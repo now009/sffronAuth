@@ -1,6 +1,7 @@
 package com.saffron.auth.service;
 
-import com.saffron.auth.config.AuthSecretProperties;
+import com.saffron.auth.entity.UserInfo;
+import com.saffron.auth.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,20 +14,21 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserAuthService implements UserDetailsService {
 
-    private final AuthSecretProperties authSecretProperties;
+    private final UserInfoRepository userInfoRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // TODO: DB Query로 전환 시 이 메서드만 교체
+    // user_info 테이블에서 사용자 정보를 조회.
+    // DB에는 평문 비밀번호가 저장되어 있다고 가정하며, 매 로그인마다 BCrypt 인코딩 후
+    // Spring Security 의 PasswordEncoder 비교 흐름에 태운다.
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return authSecretProperties.getUsers().stream()
-            .filter(u -> u.getUsername().equals(username))
-            .findFirst()
-            .map(u -> User.builder()
-                .username(u.getUsername())
-                .password(passwordEncoder.encode(u.getPassword()))
-                .roles(u.getRoles().toArray(new String[0]))
-                .build())
+        UserInfo user = userInfoRepository.findById(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        return User.builder()
+            .username(user.getUserId())
+            .password(passwordEncoder.encode(user.getPassword()))
+            .roles("USER")
+            .build();
     }
 }
