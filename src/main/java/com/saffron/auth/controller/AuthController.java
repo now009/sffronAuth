@@ -51,7 +51,7 @@ public class AuthController {
         UserInfo user = userInfoRepository.findById(authentication.getName())
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + authentication.getName()));
 
-        String token = jwtTokenService.generate(user);
+        String token = jwtTokenService.generate(user, authentication);
 
         response.sendRedirect(afterLoginRedirectUrl + "?access_token=" + token);
     }

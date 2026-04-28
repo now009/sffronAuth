@@ -1,10 +1,12 @@
 package com.saffron.auth.service;
 
 import com.saffron.auth.entity.UserInfo;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -28,11 +30,14 @@ public class JwtTokenService {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generate(UserInfo user) {
+    public String generate(UserInfo user, Authentication authentication) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationSeconds * 1000L);
 
-        return Jwts.builder()
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        JwtBuilder builder = Jwts.builder()
             .subject(user.getUserId())
             .claim("userId", user.getUserId())
             .claim("deptId", user.getDeptId())
@@ -40,7 +45,12 @@ public class JwtTokenService {
             .claim("email", user.getEmail())
             .issuedAt(now)
             .expiration(expiry)
-            .signWith(key, Jwts.SIG.HS256)
-            .compact();
+            .signWith(key, Jwts.SIG.HS256);
+
+        if (isAdmin) {
+            builder.claim("manager", "y");
+        }
+
+        return builder.compact();
     }
 }
