@@ -47,4 +47,4 @@ cors:
   allowed-origins: "*"
 
 redirect:
-  after-login: "http://localhost:8080/main"
+  after-login: "http://localhost:8080/portal/main"
