@@ -38,6 +38,11 @@ logging:
   level:
     root: INFO
     org.springframework.security: TRACE
+  # HTTP 요청/응답 로깅 필터 설정 (HttpLoggingFilter)
+  http:
+    enabled: true           # false → 필터 완전 비활성
+    max-body-size: 4096     # 출력 최대 바이트 (초과 시 truncated 표시)
+    log-status-check: false # 폴링 헬스체크 로그 여부
 
 # CORS 허용 origin 목록
 # 프론트엔드 또는 API 서버의 주소를 추가/수정

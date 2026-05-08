@@ -108,3 +108,46 @@ JWT secret key는 application.yml에서 관리할 것
 - 
 secret.yml의 auth.users: 제거 
 JWT secret: secret.yml
+
+--------------------------------------------------
+
+Spring Boot(Java, Maven) 백엔드에 HTTP 요청/응답 로깅 필터를 추가해줘.
+
+[구현 방식 — 반드시 아래 방식으로 구현]
+1. OncePerRequestFilter 를 상속한 HttpLoggingFilter 클래스 생성
+2. 요청 body 는 ContentCachingRequestWrapper 를 쓰지 말 것.
+   대신 필터 진입 즉시 StreamUtils.copyToByteArray(request.getInputStream()) 로
+   body 전체를 byte[] 에 읽어두고, HttpServletRequestWrapper 를 상속한 내부 클래스
+   (CachedBodyRequest)로 ByteArrayInputStream 을 재포장해서 chain 에 전달.
+   이렇게 해야 컨트롤러(@RequestBody)가 body 를 다시 읽을 수 있음.
+3. 응답 body 는 ContentCachingResponseWrapper 로 캐싱한 뒤,
+   finally 블록에서 반드시 copyBodyToResponse() 호출.
+4. 요청 로그는 chain.doFilter 실행 전(body 확보 직후) 출력.
+5. 응답 로그는 chain.doFilter 완료 후 출력.
+
+[로그 포맷]
+요청: >>> REQ  POST /api/recipes  [application/json]
+{"name":"TEST","content":"..."}
+응답: <<< RES  200 (12ms)  [application/json]
+{"id":4,"name":"TEST",...}
+
+[필터 제외 대상]
+- /api/ 로 시작하지 않는 경로 (정적 리소스 등)
+- WebSocket Upgrade 요청 (Upgrade: websocket 헤더)
+- 폴링용 헬스체크 엔드포인트 (yml 설정으로 제어)
+
+[yml 설정으로 제어]
+logging:
+http:
+enabled: true           # false → 필터 완전 비활성
+max-body-size: 4096     # 출력 최대 바이트 (초과 시 truncated 표시)
+log-status-check: false # 폴링 헬스체크 로그 여부
+
+[주의사항]
+- ContentCachingRequestWrapper 의 getContentAsByteArray() 는
+  Jackson 이 InputStream 을 소비한 뒤 호출하면 빈 배열을 반환하는 버그가 있음.
+  반드시 위 방식(byte[] 선읽기 + ByteArrayInputStream 재포장)을 사용할 것.
+- 바이너리 Content-Type(image/, octet-stream 등)은 body 내용 대신
+  [binary N bytes] 로 표시.
+- copyBodyToResponse() 는 finally 에서 항상 실행되어야
+  클라이언트에 응답이 정상적으로 전달됨.
